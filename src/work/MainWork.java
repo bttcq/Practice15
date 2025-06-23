@@ -5,16 +5,17 @@ import java.util.Scanner;
 
 public class MainWork {
     public static void main(String[] args) {
-        // 1. Настройка файлов
+        // Засекаем общее время выполнения программы
+        long programStartTime = System.nanoTime();
+        
         String inputFile = "input.txt";
         String outputFile = "output.txt";
         
-        // 2. Настройка ввода/вывода
         Scanner consoleScanner = new Scanner(System.in);
         PrintWriter writer = null;
         
         try {
-            // 3. Проверка входного файла
+            // Проверка входного файла
             System.out.println("Пытаюсь прочитать файл: " + new File(inputFile).getAbsolutePath());
             
             if (!new File(inputFile).exists()) {
@@ -23,16 +24,18 @@ public class MainWork {
                 return;
             }
 
-            // 4. Чтение массива
+            // Чтение массива
             System.out.println("\n=== Чтение массива из файла ===");
+            long readStartTime = System.nanoTime();
             int[] array = readArrayFromFile(inputFile);
+            long readTime = System.nanoTime() - readStartTime;
             System.out.println("Прочитано " + array.length + " элементов");
 
-            // 5. Настройка вывода в файл
+            // Настройка вывода в файл
             writer = new PrintWriter(new FileWriter(outputFile));
-            System.out.println("\n=== Выбор метода поиска ===");
+            writer.println("Время чтения массива: " + readTime/1000 + " мкс");
             
-            // 6. Выбор метода
+            System.out.println("\n=== Выбор метода поиска ===");
             System.out.println("Доступные методы:");
             System.out.println("1. Линейный поиск");
             System.out.println("2. Бинарный поиск (массив будет отсортирован)");
@@ -41,29 +44,40 @@ public class MainWork {
             int choice = consoleScanner.nextInt();
             writer.println("Выбран метод: " + (choice == 1 ? "линейный" : "бинарный"));
 
-            // 7. Ввод значения для поиска
+            // Ввод значения для поиска
             System.out.print("\nВведите значение для поиска: ");
             int value = consoleScanner.nextInt();
             writer.println("Искомое значение: " + value);
 
-            // 8. Выполнение поиска
+            // Выполнение поиска
             System.out.println("\n=== Результаты ===");
             int result = -1;
+            long searchStartTime = System.nanoTime();
             
             if (choice == 1) {
                 result = linearSearch(array, value);
             } else if (choice == 2) {
+                long sortStartTime = System.nanoTime();
                 array = sortArray(array);
+                long sortTime = System.nanoTime() - sortStartTime;
                 System.out.println("Массив отсортирован");
                 writer.println("Отсортированный массив:");
                 printArray(array, writer);
+                writer.println("Время сортировки: " + sortTime/1000 + " мкс");
                 result = binarySearch(array, value);
             }
+            
+            long searchTime = System.nanoTime() - searchStartTime;
+            writer.println("Время поиска: " + searchTime/1000 + " мкс");
 
-            // 9. Вывод результатов
+            // Вывод результатов
             String resultStr = "Результат: " + (result != -1 ? "найден на позиции " + result : "не найден");
             System.out.println(resultStr);
             writer.println(resultStr);
+
+            // Общее время выполнения
+            long totalTime = System.nanoTime() - programStartTime;
+            writer.println("Общее время выполнения: " + totalTime/1000 + " мкс");
 
         } catch (IOException e) {
             System.out.println("ОШИБКА: " + e.getMessage());
@@ -97,7 +111,6 @@ public class MainWork {
         writer.println();
     }
     
-    // Сортировка массива
     private static int[] sortArray(int[] array) {
         for (int i = 0; i < array.length - 1; i++) {
             int minIndex = i;
@@ -115,7 +128,6 @@ public class MainWork {
         return array;
     }
 
-    // Линейный поиск
     private static int linearSearch(int[] array, int value) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] == value) {
@@ -125,7 +137,6 @@ public class MainWork {
         return -1;
     }
 
-    // Бинарный поиск
     private static int binarySearch(int[] array, int value) {
         int left = 0;
         int right = array.length - 1;
